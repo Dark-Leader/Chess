@@ -69,9 +69,12 @@ class Board:
         array[start_row][start_col], array[row][col] = None, array[start_row][start_col]
         piece.move(row, col)
 
-    def remove(self, position):
+    def remove(self, position, board=None):
         row, col = position
-        self.board[row][col] = None
+        if board:
+            board[row][col] = None
+        else:
+            self.board[row][col] = None
 
     def find_legal_moves(self, piece):
         self.valid_moves = piece.find_legal_moves(self.board)
@@ -97,16 +100,21 @@ class Board:
         return False
 
     def remove_illegal_moves(self, row, col):
+        bad_moves = []
         color = self.board[row][col].get_color()
         for move, captured in self.valid_moves.items():
             copy_board = self.copy_board()
             piece = copy_board[row][col]
             end_row, end_col = move
+            if captured:
+                self.remove(captured, copy_board)
             self.move(piece, end_row, end_col, copy_board)
             king = self.find_king(color)
             if self.check(king, copy_board):
-                self.valid_moves.pop(move)
-                print(f"popped move {move}")
+                bad_moves.append(move)
+        for move in bad_moves:
+            self.valid_moves.pop(move)
+            print(f"popped move {move}")
 
     def copy_board(self):
         temp_board = [[None] * COLS for _ in range(ROWS)]
