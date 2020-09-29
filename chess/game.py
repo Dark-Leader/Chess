@@ -68,7 +68,16 @@ class Game:
             self.turn = BLACK
         else:
             self.turn = WHITE
+        self.board.find_all_possible_moves(self.turn)
+        if self.board.checkmate(self.turn):
+            if self.turn == WHITE:
+                self.winner = BLACK
+            else:
+                self.winner = WHITE
 
     def reset(self):
         self._initialize()
+
+    def get_winner(self):
+        return self.winner
 

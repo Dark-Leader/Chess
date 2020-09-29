@@ -19,6 +19,9 @@ while running:
             game.select(pos)
 
     game.update()
+    if game.get_winner():
+        print("Game Over")
+        running = False
     pygame.display.flip()
 
 pygame.quit()

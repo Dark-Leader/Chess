@@ -16,6 +16,8 @@ class Board:
         self.board = [[None] * COLS for _ in range(ROWS)]
         self._initialize_board()
         self.valid_moves = {}
+        self.all_possible_moves = {}
+        self.winner = None
 
     def _initialize_board(self):
         for row in range(ROWS):
@@ -161,3 +163,22 @@ class Board:
     def long_castle(self, row, board):
         rook = board[row][0]
         self.move(rook, row, 3, board)
+
+    def checkmate(self, color):
+        king = self.find_king(color, self.board)
+        row, col, color = king.get_row(), king.get_col(), king.get_color()
+        if self.check(row, col, color, self.board) and not bool(self.find_all_possible_moves(color)):
+            if color == WHITE:
+                return BLACK
+            elif color == BLACK:
+                return WHITE
+        return False
+
+    def find_all_possible_moves(self, color):
+        moves = {}
+        for row in range(ROWS):
+            for col in range(COLS):
+                piece = self.get_piece(row, col)
+                if piece is not None and piece.get_color() == color:
+                    moves.update(piece.find_legal_moves(self.board))
+        self.all_possible_moves = moves
