@@ -159,3 +159,6 @@ class Piece:
                 legal_moves[(self.row, left)] = []
             left -= 1
         return legal_moves
+
+    def __str__(self):
+        return f"row = {self.row}, col = {self.col}, color = {self.color}, {type(self)}"

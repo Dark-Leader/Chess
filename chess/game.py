@@ -28,19 +28,18 @@ class Game:
 
     def select(self, position):
         row, col = self.get_position(position)
-        if row <= ROWS - 1:
-            if self.selected:
-                result = self._move(row, col)
-                if not result:
-                    self.selected = None
-                    self.select(position)
-                    self.valid_moves = {}
-            piece = self.board.get_piece(row, col)
-            if piece is not None and piece.get_color() == self.turn:
-                self.selected = piece
-                self.valid_moves = self.board.find_legal_moves(piece)
-                return True
-            return False
+        if self.selected:
+            result = self._move(row, col)
+            if not result:
+                self.selected = None
+                self.select(position)
+                self.valid_moves = {}
+        piece = self.board.get_piece(row, col)
+        if piece is not None and piece.get_color() == self.turn:
+            self.selected = piece
+            self.valid_moves = self.board.find_legal_moves(piece)
+            return True
+        return False
 
     @staticmethod
     def get_position(position):
@@ -51,9 +50,6 @@ class Game:
 
     def _move(self, row, col):
         if self.selected and (row, col) in self.valid_moves:
-            capture = self.valid_moves[(row, col)]
-            if capture:
-                self.board.remove(capture)
             self.board.move(self.selected, row, col, self.board.board)
             self.change_turn()
         else:

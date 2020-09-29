@@ -69,31 +69,26 @@ class Board:
         array[start_row][start_col], array[row][col] = None, array[start_row][start_col]
         piece.move(row, col)
 
-    def remove(self, position, board=None):
-        row, col = position
-        if board:
-            board[row][col] = None
-        else:
-            self.board[row][col] = None
-
     def find_legal_moves(self, piece):
         self.valid_moves = piece.find_legal_moves(self.board)
         row, col = piece.get_row(), piece.get_col()
         self.remove_illegal_moves(row, col)
         return self.valid_moves
 
-    def find_king(self, color):
+    @staticmethod
+    def find_king(color, board):
         for row in range(ROWS):
             for col in range(COLS):
-                piece = self.get_piece(row, col)
-                if isinstance(piece, King) and piece.get_color() == color:
+                piece = board[row][col]
+                if isinstance(piece, King) and piece.get_color() == color and piece is not None:
                     return piece
 
-    def check(self, king, board):
+    @staticmethod
+    def check(king, board):
         king_row, king_col = king.get_row(), king.get_col()
         for row in range(ROWS):
             for col in range(COLS):
-                piece = self.get_piece(row, col)
+                piece = board[row][col]
                 if piece is not None and piece.get_color() != king.get_color() and \
                         (king_row, king_col) in piece.find_legal_moves(board):
                     return True
@@ -101,20 +96,19 @@ class Board:
 
     def remove_illegal_moves(self, row, col):
         bad_moves = []
-        color = self.board[row][col].get_color()
+        color = self.get_piece(row, col).get_color()
         for move, captured in self.valid_moves.items():
             copy_board = self.copy_board()
             piece = copy_board[row][col]
             end_row, end_col = move
             if captured:
-                self.remove(captured, copy_board)
+                self._remove(copy_board, captured)
             self.move(piece, end_row, end_col, copy_board)
-            king = self.find_king(color)
+            king = self.find_king(color, copy_board)
             if self.check(king, copy_board):
                 bad_moves.append(move)
         for move in bad_moves:
             self.valid_moves.pop(move)
-            print(f"popped move {move}")
 
     def copy_board(self):
         temp_board = [[None] * COLS for _ in range(ROWS)]
@@ -136,3 +130,8 @@ class Board:
                 else:
                     temp_board[row][col] = None
         return temp_board
+
+    @staticmethod
+    def _remove(board, position):
+        row, col = position
+        board[row][col] = None

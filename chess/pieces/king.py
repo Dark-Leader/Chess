@@ -58,16 +58,16 @@ class King(Piece):
                     legal_moves[(bottom, right)] = (bottom, right)
         # right
         if right <= COLS - 1:
-            right = board[row][right]
-            if right is None:
+            right_piece = board[row][right]
+            if right_piece is None:
                 legal_moves[(row, right)] = []
-            elif right is not None and right.get_color() != self.color:
+            elif right_piece is not None and right_piece.get_color() != self.color:
                 legal_moves[(row, right)] = (row, right)
         # left
         if left >= 0:
-            left = board[row][left]
-            if left is None:
+            left_piece = board[row][left]
+            if left_piece is None:
                 legal_moves[(row, left)] = []
-            elif left is not None and left.get_color() != self.color:
+            elif left_piece is not None and left_piece.get_color() != self.color:
                 legal_moves[(row, left)] = (row, left)
         return legal_moves
