@@ -1,11 +1,13 @@
 from .piece import Piece
 from chess.constants import ROWS, COLS
+from .rook import Rook
 
 
 class King(Piece):
 
     def __init__(self, row, col, color, image):
         super().__init__(row, col, color, image)
+        self.moved_before = False
 
     def find_legal_moves(self, board):
         legal_moves = {}
@@ -70,4 +72,38 @@ class King(Piece):
                 legal_moves[(row, left)] = []
             elif left_piece is not None and left_piece.get_color() != self.color:
                 legal_moves[(row, left)] = (row, left)
+                
+        legal_moves.update(self.check_short_castle_rights(board))
+        legal_moves.update(self.check_long_castle_rights(board))
         return legal_moves
+
+    def check_short_castle_rights(self, board):
+        moves = {}
+        if self.moved_before:
+            return moves
+        king_col = self.col
+        for col in range(king_col + 1, COLS - 1):
+            if board[self.row][col] is not None:
+                return moves
+        rook = board[self.row][COLS - 1]
+        if isinstance(rook, Rook) and rook.get_color() == self.color and not rook.moved_before:
+            moves[(self.row, self.col + 2)] = []
+        return moves
+
+    def check_long_castle_rights(self, board):
+        moves = {}
+        if self.moved_before:
+            return moves
+        king_col = self.col
+        for col in range(king_col - 1, 0, -1):
+            if board[self.row][col] is not None:
+                return moves
+        rook = board[self.row][0]
+        if isinstance(rook, Rook) and rook.get_color() == self.color and not rook.moved_before:
+            moves[(self.row, self.col - 2)] = []
+        return moves
+
+    def move(self, row, col):
+        super().move(row, col)
+        self.moved_before = True
+

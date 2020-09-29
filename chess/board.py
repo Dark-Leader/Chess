@@ -62,12 +62,15 @@ class Board:
     def get_piece(self, row, col):
         return self.board[row][col]
 
-    @staticmethod
-    def move(piece, row, col, array):
+    def move(self, piece, row, col, array):
         start_row = piece.get_row()
         start_col = piece.get_col()
         array[start_row][start_col], array[row][col] = None, array[start_row][start_col]
         piece.move(row, col)
+        if isinstance(piece, King) and col == start_col + 2:  # short_castle
+            self.short_castle(start_row, array)
+        elif isinstance(piece, King) and col == start_col - 2:  # long_castle
+            self.long_castle(start_row, array)
 
     def find_legal_moves(self, piece):
         self.valid_moves = piece.find_legal_moves(self.board)
@@ -84,29 +87,37 @@ class Board:
                     return piece
 
     @staticmethod
-    def check(king, board):
-        king_row, king_col = king.get_row(), king.get_col()
+    def check(king_row, king_col, king_color, board):
         for row in range(ROWS):
             for col in range(COLS):
                 piece = board[row][col]
-                if piece is not None and piece.get_color() != king.get_color() and \
+                if piece is not None and piece.get_color() != king_color and \
                         (king_row, king_col) in piece.find_legal_moves(board):
                     return True
         return False
 
     def remove_illegal_moves(self, row, col):
         bad_moves = []
-        color = self.get_piece(row, col).get_color()
+        piece = self.get_piece(row, col)
+        color = piece.get_color()
         for move, captured in self.valid_moves.items():
             copy_board = self.copy_board()
-            piece = copy_board[row][col]
+            new_piece = copy_board[row][col]
             end_row, end_col = move
             if captured:
-                self._remove(copy_board, captured)
-            self.move(piece, end_row, end_col, copy_board)
+                self.remove(copy_board, captured)
+            self.move(new_piece, end_row, end_col, copy_board)
             king = self.find_king(color, copy_board)
-            if self.check(king, copy_board):
+            king_row, king_col, king_color = king.get_row(), king.get_col(), king.get_color()
+            if self.check(king_row, king_col, king_color, copy_board):
                 bad_moves.append(move)
+            if isinstance(piece, King) and end_col == piece.get_col() + 2:  # short castle
+                if self.check(piece.get_row(), piece.get_col() + 1, color, copy_board):
+                    bad_moves.append(move)
+
+            if isinstance(piece, King) and end_col == piece.get_col() - 2:  # long castle
+                if self.check(piece.get_row(), piece.get_col() - 1, color, copy_board):
+                    bad_moves.append(move)
         for move in bad_moves:
             self.valid_moves.pop(move)
 
@@ -132,6 +143,21 @@ class Board:
         return temp_board
 
     @staticmethod
-    def _remove(board, position):
+    def remove(board, position):
         row, col = position
         board[row][col] = None
+
+    def stop_en_passant(self, color):
+        for row in range(ROWS):
+            for col in range(COLS):
+                piece = self.get_piece(row, col)
+                if isinstance(piece, Pawn) and piece.get_color() != color:
+                    piece.can_be_captured_en_passant = False
+                    
+    def short_castle(self, row, board):
+        rook = board[row][COLS - 1]
+        self.move(rook, row, COLS - 3, board)
+
+    def long_castle(self, row, board):
+        rook = board[row][0]
+        self.move(rook, row, 3, board)

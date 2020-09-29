@@ -51,6 +51,11 @@ class Game:
     def _move(self, row, col):
         if self.selected and (row, col) in self.valid_moves:
             self.board.move(self.selected, row, col, self.board.board)
+            capture = self.valid_moves[(row, col)]
+            if capture:
+                capture_row, capture_col = capture
+                if capture_row != row:  # en passant
+                    self.board.remove(self.board.board, capture)
             self.change_turn()
         else:
             return False
@@ -58,6 +63,7 @@ class Game:
 
     def change_turn(self):
         self.valid_moves = {}
+        self.board.stop_en_passant(self.turn)
         if self.turn == WHITE:
             self.turn = BLACK
         else:
@@ -65,3 +71,4 @@ class Game:
 
     def reset(self):
         self._initialize()
+

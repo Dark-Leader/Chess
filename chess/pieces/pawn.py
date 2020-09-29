@@ -1,5 +1,5 @@
-from .piece import Piece
-from chess.constants import BLACK, WHITE, ROWS, COLS
+from chess.pieces.piece import Piece
+from chess.constants import WHITE, ROWS, COLS
 
 
 class Pawn(Piece):
@@ -8,12 +8,17 @@ class Pawn(Piece):
         super().__init__(row, col, color, image)
         self.can_be_captured_en_passant = False
 
-    def find_legal_moves(self, board, last_move=None):
+    def find_legal_moves(self, board):
         if self.color == WHITE:
-            return self.find_white_legal_moves(board, last_move)
-        return self.find_black_legal_moves(board, last_move)
+            return self.find_white_legal_moves(board)
+        return self.find_black_legal_moves(board)
 
-    def find_white_legal_moves(self, board, last_move=False):
+    def move(self, new_row, new_col):
+        if abs(new_row - self.row) == 2:
+            self.can_be_captured_en_passant = True
+        return super().move(new_row, new_col)
+
+    def find_white_legal_moves(self, board):
         legal_moves = {}
         row = self.row
         top = self.row - 1
@@ -50,7 +55,7 @@ class Pawn(Piece):
                     legal_moves[(top, right)] = (row, right)
         return legal_moves
 
-    def find_black_legal_moves(self, board, last_move=False):
+    def find_black_legal_moves(self, board):
         legal_moves = {}
         row = self.row
         bottom = self.row + 1

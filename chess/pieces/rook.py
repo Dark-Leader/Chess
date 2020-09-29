@@ -14,3 +14,7 @@ class Rook(Piece):
         legal_moves.update(self.find_right_moves(board))
         legal_moves.update(self.find_left_moves(board))
         return legal_moves
+
+    def move(self, row, col):
+        super().move(row, col)
+        self.moved_before = True
