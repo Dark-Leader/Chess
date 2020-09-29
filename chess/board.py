@@ -152,7 +152,7 @@ class Board:
             for col in range(COLS):
                 piece = self.get_piece(row, col)
                 if isinstance(piece, Pawn) and piece.get_color() != color:
-                    piece.can_be_captured_en_passant = False
+                    piece.change_en_passant_status()
                     
     def short_castle(self, row, board):
         rook = board[row][COLS - 1]

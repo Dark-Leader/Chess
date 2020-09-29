@@ -15,7 +15,7 @@ class Pawn(Piece):
 
     def move(self, new_row, new_col):
         if abs(new_row - self.row) == 2:
-            self.can_be_captured_en_passant = True
+            self.change_en_passant_status()
         return super().move(new_row, new_col)
 
     def find_white_legal_moves(self, board):
@@ -91,3 +91,6 @@ class Pawn(Piece):
                         piece_right.can_be_captured_en_passant:
                     legal_moves[(bottom, right)] = (row, right)
         return legal_moves
+
+    def change_en_passant_status(self):
+        self.can_be_captured_en_passant = not self.can_be_captured_en_passant
