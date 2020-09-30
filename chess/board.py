@@ -69,9 +69,11 @@ class Board:
         start_col = piece.get_col()
         array[start_row][start_col], array[row][col] = None, array[start_row][start_col]
         piece.move(row, col)
-        if isinstance(piece, King) and col == start_col + 2:  # short_castle
+        if isinstance(piece, King) and col == start_col + 2 and not \
+                self.check(start_row, start_col, piece.get_color(), array):  # short_castle
             self.short_castle(start_row, array)
-        elif isinstance(piece, King) and col == start_col - 2:  # long_castle
+        elif isinstance(piece, King) and col == start_col - 2 and not \
+                self.check(start_row, start_col, piece.get_color(), array):  # long_castle
             self.long_castle(start_row, array)
 
     def find_legal_moves(self, piece):
@@ -106,10 +108,10 @@ class Board:
             copy_board = self.copy_board()
             new_piece = copy_board[row][col]
             end_row, end_col = move
+            king = self.find_king(color, copy_board)
             if captured:
                 self.remove(copy_board, captured)
             self.move(new_piece, end_row, end_col, copy_board)
-            king = self.find_king(color, copy_board)
             king_row, king_col, king_color = king.get_row(), king.get_col(), king.get_color()
             if self.check(king_row, king_col, king_color, copy_board):
                 bad_moves.append(move)
@@ -154,14 +156,16 @@ class Board:
                 piece = self.get_piece(row, col)
                 if isinstance(piece, Pawn) and piece.get_color() != color:
                     piece.change_en_passant_status()
-                    
+
     def short_castle(self, row, board):
         rook = board[row][COLS - 1]
-        self.move(rook, row, COLS - 3, board)
+        if rook:
+            self.move(rook, row, COLS - 3, board)
 
     def long_castle(self, row, board):
         rook = board[row][0]
-        self.move(rook, row, 3, board)
+        if rook:
+            self.move(rook, row, 3, board)
 
     def checkmate_or_stalemate(self, color):
         king = self.find_king(color, self.board)
@@ -182,6 +186,14 @@ class Board:
             for col in range(COLS):
                 piece = self.get_piece(row, col)
                 if piece is not None and piece.get_color() == color:
-                    moves.update(piece.find_legal_moves(self.board))
-                    self.remove_illegal_moves(row, col, moves)
+                    current = piece.find_legal_moves(self.board)
+                    if current:
+                        self.remove_illegal_moves(row, col, current)
+                    moves.update(current)
+        # might be overridden mid traversal above so we check again the king legal moves
+        king = self.find_king(color, self.board)
+        row, col = king.get_row(), king.get_col()
+        king_moves = king.find_legal_moves(self.board)
+        moves.update(king_moves)
+        self.remove_illegal_moves(row, col, moves)
         self.all_possible_moves = moves

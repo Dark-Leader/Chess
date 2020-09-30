@@ -1,5 +1,10 @@
 from chess.pieces.piece import Piece
-from chess.constants import WHITE, ROWS, COLS
+from chess.constants import (WHITE, ROWS, COLS, WHITE_BISHOP, BLACK_BISHOP, WHITE_QUEEN, BLACK_QUEEN, WHITE_ROOK,
+                             BLACK_ROOK, WHITE_KNIGHT,BLACK_KNIGHT, BLACK)
+from chess.pieces.bishop import Bishop
+from chess.pieces.queen import Queen
+from chess.pieces.rook import Rook
+from chess.pieces.knight import Knight
 
 
 class Pawn(Piece):
@@ -94,3 +99,27 @@ class Pawn(Piece):
 
     def change_en_passant_status(self):
         self.can_be_captured_en_passant = not self.can_be_captured_en_passant
+
+    def promote_to_bishop(self):
+        if self.color == WHITE:
+            return Bishop(self.row, self.col, WHITE, WHITE_BISHOP)
+        else:
+            return Bishop(self.row, self.col, BLACK, BLACK_BISHOP)
+
+    def promote_to_queen(self):
+        if self.color == WHITE:
+            return Queen(self.row, self.col, WHITE, WHITE_QUEEN)
+        else:
+            return Queen(self.row, self.col, BLACK, BLACK_QUEEN)
+
+    def promote_to_knight(self):
+        if self.color == WHITE:
+            return Knight(self.row, self.col, WHITE, WHITE_KNIGHT)
+        else:
+            return Knight(self.row, self.col, BLACK, BLACK_KNIGHT)
+
+    def promote_to_rook(self):
+        if self.color == WHITE:
+            return Rook(self.row, self.col, WHITE, WHITE_ROOK)
+        else:
+            return Rook(self.row, self.col, BLACK, BLACK_ROOK)
