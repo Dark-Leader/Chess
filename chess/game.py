@@ -1,5 +1,5 @@
 from chess.board import Board
-from chess.constants import WHITE, BLACK, LIGHT_BLUE, SQUARE_SIZE, POSSIBLE_MOVE_RADIUS, ROWS
+from chess.constants import WHITE, BLACK, LIGHT_BLUE, SQUARE_SIZE, POSSIBLE_MOVE_RADIUS
 import pygame
 
 
@@ -69,11 +69,7 @@ class Game:
         else:
             self.turn = WHITE
         self.board.find_all_possible_moves(self.turn)
-        if self.board.checkmate(self.turn):
-            if self.turn == WHITE:
-                self.winner = BLACK
-            else:
-                self.winner = WHITE
+        self.winner = self.board.checkmate_or_stalemate(self.turn)
 
     def reset(self):
         self._initialize()

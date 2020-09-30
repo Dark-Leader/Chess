@@ -77,7 +77,7 @@ class Board:
     def find_legal_moves(self, piece):
         self.valid_moves = piece.find_legal_moves(self.board)
         row, col = piece.get_row(), piece.get_col()
-        self.remove_illegal_moves(row, col)
+        self.remove_illegal_moves(row, col, self.valid_moves)
         return self.valid_moves
 
     @staticmethod
@@ -98,11 +98,11 @@ class Board:
                     return True
         return False
 
-    def remove_illegal_moves(self, row, col):
+    def remove_illegal_moves(self, row, col, moves):
         bad_moves = []
         piece = self.get_piece(row, col)
         color = piece.get_color()
-        for move, captured in self.valid_moves.items():
+        for move, captured in moves.items():
             copy_board = self.copy_board()
             new_piece = copy_board[row][col]
             end_row, end_col = move
@@ -116,12 +116,11 @@ class Board:
             if isinstance(piece, King) and end_col == piece.get_col() + 2:  # short castle
                 if self.check(piece.get_row(), piece.get_col() + 1, color, copy_board):
                     bad_moves.append(move)
-
             if isinstance(piece, King) and end_col == piece.get_col() - 2:  # long castle
                 if self.check(piece.get_row(), piece.get_col() - 1, color, copy_board):
                     bad_moves.append(move)
         for move in bad_moves:
-            self.valid_moves.pop(move)
+            moves.pop(move)
 
     def copy_board(self):
         temp_board = [[None] * COLS for _ in range(ROWS)]
@@ -164,15 +163,18 @@ class Board:
         rook = board[row][0]
         self.move(rook, row, 3, board)
 
-    def checkmate(self, color):
+    def checkmate_or_stalemate(self, color):
         king = self.find_king(color, self.board)
         row, col, color = king.get_row(), king.get_col(), king.get_color()
-        if self.check(row, col, color, self.board) and not bool(self.find_all_possible_moves(color)):
-            if color == WHITE:
-                return BLACK
-            elif color == BLACK:
-                return WHITE
-        return False
+        if not bool(self.all_possible_moves):
+            if self.check(row, col, color, self.board):
+                if color == WHITE:
+                    return "Black Won"
+                elif color == BLACK:
+                    return "White Won"
+            else:
+                return "Stalemate"
+        return None
 
     def find_all_possible_moves(self, color):
         moves = {}
@@ -181,4 +183,5 @@ class Board:
                 piece = self.get_piece(row, col)
                 if piece is not None and piece.get_color() == color:
                     moves.update(piece.find_legal_moves(self.board))
+                    self.remove_illegal_moves(row, col, moves)
         self.all_possible_moves = moves
