@@ -18,6 +18,7 @@ class Board:
         self.valid_moves = {}
         self.all_possible_moves = {}
         self.winner = None
+        self.promotion_move = False
 
     def _initialize_board(self):
         for row in range(ROWS):
@@ -75,6 +76,8 @@ class Board:
         elif isinstance(piece, King) and col == start_col - 2 and not \
                 self.check(start_row, start_col, piece.get_color(), array):  # long_castle
             self.long_castle(start_row, array)
+        elif isinstance(piece, Pawn) and (row == ROWS - 1 or row == 0):
+            self.promotion_move = (row, col)
 
     def find_legal_moves(self, piece):
         self.valid_moves = piece.find_legal_moves(self.board)

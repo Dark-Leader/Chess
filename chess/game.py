@@ -77,3 +77,9 @@ class Game:
     def get_winner(self):
         return self.winner
 
+    def check_promotion(self):
+        piece = self.board.promotion_move
+        if piece:
+            self.board.promotion_move = False
+            return piece
+        return False
