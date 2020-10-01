@@ -1,4 +1,4 @@
-from chess.constants import SQUARE_SIZE, ROWS, COLS
+from chess.constants import SQUARE_SIZE, ROWS, COLS, BOARD_EDGE
 
 
 class Piece:
@@ -15,7 +15,7 @@ class Piece:
         self.set_col(new_col)
 
     def draw(self, win):
-        win.blit(self.image, (self.col * SQUARE_SIZE, self.row * SQUARE_SIZE))
+        win.blit(self.image, (self.col * SQUARE_SIZE + BOARD_EDGE, self.row * SQUARE_SIZE + BOARD_EDGE))
         
     def get_row(self):
         return self.row

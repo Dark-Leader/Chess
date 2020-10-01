@@ -1,6 +1,6 @@
 from .constants import (ROWS, COLS, BLACK, WHITE, SQUARE_SIZE, BLACK_KING, BLACK_ROOK, BLACK_PAWN, BLACK_BISHOP,
                         BLACK_QUEEN, BLACK_KNIGHT, WHITE_BISHOP, WHITE_PAWN, WHITE_QUEEN, WHITE_ROOK, WHITE_KING,
-                        WHITE_KNIGHT, DARK_SQUARE)
+                        WHITE_KNIGHT, DARK_SQUARE, BOARD_EDGE)
 from .pieces.rook import Rook
 from .pieces.bishop import Bishop
 from .pieces.knight import Knight
@@ -35,8 +35,8 @@ class Board:
                     self.board[row][col] = Bishop(row, col, BLACK, BLACK_BISHOP)
                 elif row == 7 and (col == 2 or col == 5):
                     self.board[row][col] = Bishop(row, col, WHITE, WHITE_BISHOP)
-                elif row == 0 and col == 3:
-                    self.board[row][col] = Queen(row, col, BLACK, BLACK_QUEEN)
+                # elif row == 0 and col == 3:
+                    # self.board[row][col] = Queen(row, col, BLACK, BLACK_QUEEN)
                 elif row == 7 and col == 3:
                     self.board[row][col] = Queen(row, col, WHITE, WHITE_QUEEN)
                 elif row == 0 and col == 4:
@@ -45,16 +45,29 @@ class Board:
                     self.board[row][col] = King(row, col, WHITE, WHITE_KING)
                 elif row == 1:
                     self.board[row][col] = Pawn(row, col, BLACK, BLACK_PAWN)
-                elif row == 6:
+                elif row == 6 and col != 4:
                     self.board[row][col] = Pawn(row, col, WHITE, WHITE_PAWN)
+                elif row == 3 and col == 3:
+                    self.board[row][col] = Queen(row, col , BLACK, BLACK_QUEEN)
                 else:
                     self.board[row][col] = None
 
     def draw(self, win):
-        win.fill(DARK_SQUARE)
+        win.fill(BLACK)
         for row in range(ROWS):
-            for col in range(row % 2, COLS, 2):
-                pygame.draw.rect(win, WHITE, (SQUARE_SIZE * col, SQUARE_SIZE * row, SQUARE_SIZE, SQUARE_SIZE))
+            for col in range(COLS):
+                if row % 2 == 0 and col % 2 == 0:
+                    pygame.draw.rect(win, WHITE, (SQUARE_SIZE * col + BOARD_EDGE, SQUARE_SIZE * row + BOARD_EDGE,
+                                                  SQUARE_SIZE, SQUARE_SIZE))
+                elif row % 2 == 0 and col % 2 == 1:
+                    pygame.draw.rect(win, DARK_SQUARE, (SQUARE_SIZE * col + BOARD_EDGE, SQUARE_SIZE * row + BOARD_EDGE,
+                                                        SQUARE_SIZE, SQUARE_SIZE))
+                elif row % 2 == 1 and col % 2 == 0:
+                    pygame.draw.rect(win, DARK_SQUARE, (SQUARE_SIZE * col + BOARD_EDGE, SQUARE_SIZE * row + BOARD_EDGE,
+                                                        SQUARE_SIZE, SQUARE_SIZE))
+                else:
+                    pygame.draw.rect(win, WHITE, (SQUARE_SIZE * col + BOARD_EDGE, SQUARE_SIZE * row + BOARD_EDGE,
+                                                  SQUARE_SIZE, SQUARE_SIZE))
 
         for row in range(ROWS):
             for col in range(COLS):
@@ -191,13 +204,12 @@ class Board:
                 piece = self.get_piece(row, col)
                 if piece is not None and piece.get_color() == color:
                     current = piece.find_legal_moves(self.board)
-                    if current:
-                        self.remove_illegal_moves(row, col, current)
+                    self.remove_illegal_moves(row, col, current)
                     moves.update(current)
         # might be overridden mid traversal above so we check again the king legal moves
         king = self.find_king(color, self.board)
         row, col = king.get_row(), king.get_col()
         king_moves = king.find_legal_moves(self.board)
+        self.remove_illegal_moves(row, col, king_moves)
         moves.update(king_moves)
-        self.remove_illegal_moves(row, col, moves)
         self.all_possible_moves = moves

@@ -1,5 +1,5 @@
 from chess.board import Board
-from chess.constants import WHITE, BLACK, LIGHT_BLUE, SQUARE_SIZE, POSSIBLE_MOVE_RADIUS
+from chess.constants import WHITE, BLACK, LIGHT_BLUE, SQUARE_SIZE, POSSIBLE_MOVE_RADIUS, BOARD_EDGE, HEIGHT, WIDTH
 import pygame
 
 
@@ -12,7 +12,7 @@ class Game:
     def _initialize(self):
         self.board = Board()
         self.selected = None
-        self.turn = WHITE
+        self.turn = BLACK
         self.valid_moves = {}
         self.winner = None
 
@@ -23,30 +23,35 @@ class Game:
     def draw_valid_moves(self):
         for move in self.valid_moves:
             row, col = move
-            pygame.draw.circle(self.win, LIGHT_BLUE, (int(col * SQUARE_SIZE + SQUARE_SIZE // 2),
-                                                      int(row * SQUARE_SIZE + SQUARE_SIZE // 2)), POSSIBLE_MOVE_RADIUS)
+            pygame.draw.circle(self.win, LIGHT_BLUE, (col * SQUARE_SIZE + SQUARE_SIZE // 2 + BOARD_EDGE,
+                               row * SQUARE_SIZE + SQUARE_SIZE // 2 + BOARD_EDGE), POSSIBLE_MOVE_RADIUS)
 
     def select(self, position):
-        row, col = self.get_position(position)
-        if self.selected:
-            result = self._move(row, col)
-            if not result:
-                self.selected = None
-                self.select(position)
-                self.valid_moves = {}
-        piece = self.board.get_piece(row, col)
-        if piece is not None and piece.get_color() == self.turn:
-            self.selected = piece
-            self.valid_moves = self.board.find_legal_moves(piece)
-            return True
+        result = self.get_position(position)
+        if result:
+            row, col = result
+            if self.selected:
+                result = self._move(row, col)
+                if not result:
+                    self.selected = None
+                    self.select(position)
+                    self.valid_moves = {}
+            piece = self.board.get_piece(row, col)
+            if piece is not None and piece.get_color() == self.turn:
+                self.selected = piece
+                self.valid_moves = self.board.find_legal_moves(piece)
+                return True
         return False
 
     @staticmethod
     def get_position(position):
         x, y = position
-        row = int(y // SQUARE_SIZE)
-        col = int(x // SQUARE_SIZE)
-        return row, col
+        if BOARD_EDGE <= x <= WIDTH + BOARD_EDGE and BOARD_EDGE <= y <= HEIGHT + BOARD_EDGE:
+            row = (y - BOARD_EDGE) // SQUARE_SIZE
+            col = (x - BOARD_EDGE) // SQUARE_SIZE
+            return row, col
+        else:
+            return None
 
     def _move(self, row, col):
         if self.selected and (row, col) in self.valid_moves:
