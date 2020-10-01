@@ -125,7 +125,8 @@ class Board:
                 if self.check(piece.get_row(), piece.get_col() - 1, color, copy_board):
                     bad_moves.append(move)
         for move in bad_moves:
-            moves.pop(move)
+            if move in moves:
+                moves.pop(move)
 
     def copy_board(self):
         temp_board = [[None] * COLS for _ in range(ROWS)]
