@@ -1,3 +1,3 @@
 # Chess in python
 # Made by Amit Ben Shimon
-# Consider the code open source
+# Consider the code open source 
