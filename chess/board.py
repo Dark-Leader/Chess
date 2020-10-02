@@ -35,8 +35,8 @@ class Board:
                     self.board[row][col] = Bishop(row, col, BLACK, BLACK_BISHOP)
                 elif row == 7 and (col == 2 or col == 5):
                     self.board[row][col] = Bishop(row, col, WHITE, WHITE_BISHOP)
-                # elif row == 0 and col == 3:
-                    # self.board[row][col] = Queen(row, col, BLACK, BLACK_QUEEN)
+                elif row == 0 and col == 3:
+                    self.board[row][col] = Queen(row, col, BLACK, BLACK_QUEEN)
                 elif row == 7 and col == 3:
                     self.board[row][col] = Queen(row, col, WHITE, WHITE_QUEEN)
                 elif row == 0 and col == 4:
@@ -45,10 +45,8 @@ class Board:
                     self.board[row][col] = King(row, col, WHITE, WHITE_KING)
                 elif row == 1:
                     self.board[row][col] = Pawn(row, col, BLACK, BLACK_PAWN)
-                elif row == 6 and col != 4:
+                elif row == 6:
                     self.board[row][col] = Pawn(row, col, WHITE, WHITE_PAWN)
-                elif row == 3 and col == 3:
-                    self.board[row][col] = Queen(row, col , BLACK, BLACK_QUEEN)
                 else:
                     self.board[row][col] = None
 
@@ -213,3 +211,25 @@ class Board:
         self.remove_illegal_moves(row, col, king_moves)
         moves.update(king_moves)
         self.all_possible_moves = moves
+
+    def get_fen(self, turn):
+        fen = ""
+        for row in range(ROWS):
+            count = 0
+            for col in range(COLS):
+                piece = self.get_piece(row, col)
+                if piece:
+                    if count:
+                        fen += str(count)
+                        count = 0
+                    fen += piece.to_fen()
+                else:
+                    count += 1
+            if count > 0:
+                fen += str(count)
+            fen += "/"
+        if turn == WHITE:
+            fen += " b KQkq 0 1"
+        else:
+            fen += " w KQkq 0 1"
+        return fen

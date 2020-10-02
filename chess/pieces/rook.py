@@ -1,4 +1,5 @@
 from .piece import Piece
+from chess.constants import WHITE
 
 
 class Rook(Piece):
@@ -18,3 +19,9 @@ class Rook(Piece):
     def move(self, row, col):
         super().move(row, col)
         self.moved_before = True
+
+    def to_fen(self):
+        if self.color == WHITE:
+            return "R"
+        else:
+            return "r"

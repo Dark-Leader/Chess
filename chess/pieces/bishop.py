@@ -1,4 +1,5 @@
 from .piece import Piece
+from chess.constants import WHITE
 
 
 class Bishop(Piece):
@@ -13,3 +14,9 @@ class Bishop(Piece):
         legal_moves.update(self.find_bottom_left_diagonal_moves(board))
         legal_moves.update(self.find_bottom_right_diagonal_moves(board))
         return legal_moves
+
+    def to_fen(self):
+        if self.color == WHITE:
+            return "B"
+        else:
+            return "b"

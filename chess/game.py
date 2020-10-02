@@ -12,7 +12,7 @@ class Game:
     def _initialize(self):
         self.board = Board()
         self.selected = None
-        self.turn = BLACK
+        self.turn = WHITE
         self.valid_moves = {}
         self.winner = None
 
@@ -56,6 +56,7 @@ class Game:
     def _move(self, row, col):
         if self.selected and (row, col) in self.valid_moves:
             self.board.move(self.selected, row, col, self.board.board)
+            print(self.board.get_fen(self.turn))
             capture = self.valid_moves[(row, col)]
             if capture:
                 capture_row, capture_col = capture

@@ -1,5 +1,5 @@
 from .piece import Piece
-from chess.constants import ROWS, COLS
+from chess.constants import ROWS, COLS, WHITE
 from .rook import Rook
 
 
@@ -107,3 +107,8 @@ class King(Piece):
         super().move(row, col)
         self.moved_before = True
 
+    def to_fen(self):
+        if self.color == WHITE:
+            return "K"
+        else:
+            return "k"

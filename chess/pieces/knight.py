@@ -1,5 +1,5 @@
 from .piece import Piece
-from chess.constants import ROWS, COLS
+from chess.constants import ROWS, COLS, WHITE
 
 
 class Knight(Piece):
@@ -54,3 +54,9 @@ class Knight(Piece):
         elif possible_square is not None and possible_square.get_color() != self.color:
             legal_moves[(row, col)] = (row, col)
         return legal_moves
+
+    def to_fen(self):
+        if self.color == WHITE:
+            return "N"
+        else:
+            return "n"

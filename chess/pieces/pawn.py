@@ -1,6 +1,6 @@
 from chess.pieces.piece import Piece
 from chess.constants import (WHITE, ROWS, COLS, WHITE_BISHOP, BLACK_BISHOP, WHITE_QUEEN, BLACK_QUEEN, WHITE_ROOK,
-                             BLACK_ROOK, WHITE_KNIGHT,BLACK_KNIGHT, BLACK)
+                             BLACK_ROOK, WHITE_KNIGHT, BLACK_KNIGHT, BLACK)
 from chess.pieces.bishop import Bishop
 from chess.pieces.queen import Queen
 from chess.pieces.rook import Rook
@@ -123,3 +123,9 @@ class Pawn(Piece):
             return Rook(self.row, self.col, WHITE, WHITE_ROOK)
         else:
             return Rook(self.row, self.col, BLACK, BLACK_ROOK)
+
+    def to_fen(self):
+        if self.color == WHITE:
+            return "P"
+        else:
+            return "p"

@@ -161,4 +161,5 @@ class Piece:
         return legal_moves
 
     def __str__(self):
+        # helpful for debugging stuff..
         return f"row = {self.row}, col = {self.col}, color = {self.color}, {type(self)}"

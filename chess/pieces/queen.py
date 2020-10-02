@@ -1,4 +1,5 @@
 from .piece import Piece
+from chess.constants import WHITE
 
 
 class Queen(Piece):
@@ -20,3 +21,8 @@ class Queen(Piece):
         legal_moves.update(self.find_bottom_right_diagonal_moves(board))
         return legal_moves
 
+    def to_fen(self):
+        if self.color == WHITE:
+            return "Q"
+        else:
+            return "q"
