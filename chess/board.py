@@ -1,6 +1,6 @@
 from .constants import (ROWS, COLS, BLACK, WHITE, SQUARE_SIZE, BLACK_KING, BLACK_ROOK, BLACK_PAWN, BLACK_BISHOP,
                         BLACK_QUEEN, BLACK_KNIGHT, WHITE_BISHOP, WHITE_PAWN, WHITE_QUEEN, WHITE_ROOK, WHITE_KING,
-                        WHITE_KNIGHT, DARK_SQUARE, BOARD_EDGE)
+                        WHITE_KNIGHT, DARK_SQUARE, BOARD_EDGE, LIGHT_BLUE, WIDTH, HEIGHT, TEXT_OFFSET)
 from .pieces.rook import Rook
 from .pieces.bishop import Bishop
 from .pieces.knight import Knight
@@ -51,7 +51,7 @@ class Board:
                     self.board[row][col] = None
 
     def draw(self, win):
-        win.fill(BLACK)
+        win.fill(LIGHT_BLUE)
         for row in range(ROWS):
             for col in range(COLS):
                 if row % 2 == 0 and col % 2 == 0:
@@ -72,6 +72,29 @@ class Board:
                 piece = self.get_piece(row, col)
                 if piece:
                     piece.draw(win)
+
+        col_letters = {0: "A",
+                       1: "B",
+                       2: "C",
+                       3: "D",
+                       4: "E",
+                       5: "F",
+                       6: "G",
+                       7: "H"}
+        row_numbers = [i for i in range(1, 9)]
+        for index, col in col_letters.items():
+            font = pygame.font.Font(None, 24)
+            text = font.render(col, 1, BLACK)
+            win.blit(text, (SQUARE_SIZE * index + BOARD_EDGE + SQUARE_SIZE * 0.5 - TEXT_OFFSET // 2, TEXT_OFFSET // 2))
+            win.blit(text, (SQUARE_SIZE * index + BOARD_EDGE + SQUARE_SIZE * 0.5 - TEXT_OFFSET // 2,
+                            HEIGHT + BOARD_EDGE + TEXT_OFFSET // 2))
+        for row in row_numbers:
+            font = pygame.font.Font(None, 24)
+            text = font.render(str(row), 1, BLACK)
+            win.blit(text, (TEXT_OFFSET, BOARD_EDGE + (row - 1) * SQUARE_SIZE + SQUARE_SIZE // 2 - TEXT_OFFSET // 2))
+            win.blit(text, (SQUARE_SIZE * 8 + BOARD_EDGE + TEXT_OFFSET,
+                            BOARD_EDGE + (row - 1) * SQUARE_SIZE + SQUARE_SIZE // 2 - TEXT_OFFSET // 2))
+
 
     def get_piece(self, row, col):
         return self.board[row][col]
@@ -169,7 +192,7 @@ class Board:
         for row in range(ROWS):
             for col in range(COLS):
                 piece = self.get_piece(row, col)
-                if isinstance(piece, Pawn) and piece.get_color() != color:
+                if isinstance(piece, Pawn) and piece.get_color() != color and piece.can_be_captured_en_passant:
                     piece.change_en_passant_status()
 
     def short_castle(self, row, board):
@@ -214,6 +237,11 @@ class Board:
 
     def get_fen(self, turn):
         fen = ""
+        en_passant = False
+        white_king_side_castle = True
+        white_queen_side_castle = True
+        black_king_side_castle = True
+        black_queen_side_castle = True
         for row in range(ROWS):
             count = 0
             for col in range(COLS):
@@ -222,12 +250,18 @@ class Board:
                     if count:
                         fen += str(count)
                         count = 0
+                        if isinstance(piece, Pawn) and piece.can_be_captured_en_passant:
+                            if piece.get_color() == WHITE:
+                                en_passant = (row + 1, col)
+                            else:
+                                en_passant = (row - 1, col)
                     fen += piece.to_fen()
                 else:
                     count += 1
             if count > 0:
                 fen += str(count)
-            fen += "/"
+            if row != ROWS - 1:
+                fen += "/"
         if turn == WHITE:
             fen += " b KQkq 0 1"
         else:

@@ -1,6 +1,7 @@
 import pygame
 
-WIDTH = HEIGHT = 800
+HEIGHT = 800
+WIDTH = 1200
 SQUARE_SIZE = 100
 BLACK_BISHOP = pygame.image.load("resources/bb.png")
 WHITE_BISHOP = pygame.image.load("resources/wb.png")

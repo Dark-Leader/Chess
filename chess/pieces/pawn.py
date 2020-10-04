@@ -98,7 +98,7 @@ class Pawn(Piece):
         return legal_moves
 
     def change_en_passant_status(self):
-        self.can_be_captured_en_passant = not self.can_be_captured_en_passant
+        self.can_be_captured_en_passant ^= True
 
     def promote_to_bishop(self):
         if self.color == WHITE:

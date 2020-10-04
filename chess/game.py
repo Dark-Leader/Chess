@@ -1,5 +1,6 @@
 from chess.board import Board
 from chess.constants import WHITE, BLACK, LIGHT_BLUE, SQUARE_SIZE, POSSIBLE_MOVE_RADIUS, BOARD_EDGE, HEIGHT, WIDTH
+from chess.shapes.button import Button
 import pygame
 
 
@@ -15,6 +16,7 @@ class Game:
         self.turn = WHITE
         self.valid_moves = {}
         self.winner = None
+        self.buttons = []
 
     def update(self):
         self.board.draw(self.win)
@@ -56,13 +58,13 @@ class Game:
     def _move(self, row, col):
         if self.selected and (row, col) in self.valid_moves:
             self.board.move(self.selected, row, col, self.board.board)
-            print(self.board.get_fen(self.turn))
             capture = self.valid_moves[(row, col)]
             if capture:
                 capture_row, capture_col = capture
                 if capture_row != row:  # en passant
                     self.board.remove(self.board.board, capture)
             self.change_turn()
+            print(self.board.get_fen(self.turn))
         else:
             return False
         return True
