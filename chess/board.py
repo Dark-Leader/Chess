@@ -1,6 +1,6 @@
 from .constants import (ROWS, COLS, BLACK, WHITE, SQUARE_SIZE, BLACK_KING, BLACK_ROOK, BLACK_PAWN, BLACK_BISHOP,
                         BLACK_QUEEN, BLACK_KNIGHT, WHITE_BISHOP, WHITE_PAWN, WHITE_QUEEN, WHITE_ROOK, WHITE_KING,
-                        WHITE_KNIGHT, DARK_SQUARE, BOARD_EDGE, LIGHT_BLUE, WIDTH, HEIGHT, TEXT_OFFSET)
+                        WHITE_KNIGHT, DARK_SQUARE, BOARD_EDGE, LIGHT_BLUE, HEIGHT, TEXT_OFFSET)
 from .pieces.rook import Rook
 from .pieces.bishop import Bishop
 from .pieces.knight import Knight
@@ -94,7 +94,6 @@ class Board:
             win.blit(text, (TEXT_OFFSET, BOARD_EDGE + (row - 1) * SQUARE_SIZE + SQUARE_SIZE // 2 - TEXT_OFFSET // 2))
             win.blit(text, (SQUARE_SIZE * 8 + BOARD_EDGE + TEXT_OFFSET,
                             BOARD_EDGE + (row - 1) * SQUARE_SIZE + SQUARE_SIZE // 2 - TEXT_OFFSET // 2))
-
 
     def get_piece(self, row, col):
         return self.board[row][col]
@@ -316,4 +315,23 @@ class Board:
             row, col = en_passant
             col = cols[col]
             fen += f" {col}{row}"
+        return fen
+
+    def get_position(self):
+        fen = ""
+        for row in range(ROWS):
+            count = 0
+            for col in range(COLS):
+                piece = self.get_piece(row, col)
+                if piece:
+                    if count:
+                        fen += str(count)
+                        count = 0
+                    fen += piece.to_fen()
+                else:
+                    count += 1
+            if count > 0:
+                fen += str(count)
+            if row != ROWS - 1:
+                fen += "/"
         return fen

@@ -18,7 +18,7 @@ class Game:
         self.valid_moves = {}
         self.winner = None
         self.moves_since_pawn_move_or_capture = 0
-        self.past_positions = {}
+        self.past_positions = {self.board.get_position() : 1}
         self.buttons = []
 
     def update(self):
@@ -71,14 +71,16 @@ class Game:
                 self.moves_since_pawn_move_or_capture = 0
             else:
                 self.moves_since_pawn_move_or_capture += 1
-            self.change_turn()
-            print(self.moves_since_pawn_move_or_capture)
-            print(self.board.get_fen(self.turn))
+            position = self.board.get_position()
+            self.update_past_positions()
+            self.change_turn(position)
+            # print(self.board.get_fen(self.turn))
+            # print(self.board.get_position())
         else:
             return False
         return True
 
-    def change_turn(self):
+    def change_turn(self, position):
         self.valid_moves = {}
         self.board.stop_en_passant(self.turn)
         if self.turn == WHITE:
@@ -88,6 +90,8 @@ class Game:
         self.board.find_all_possible_moves(self.turn)
         if self.moves_since_pawn_move_or_capture == 100:
             self.winner = "Draw - 50 move rule"
+        elif self.past_positions[position] == 3:
+            self.winner = "Draw - 3 fold repetition"
         else:
             self.winner = self.board.checkmate_or_stalemate(self.turn)
 
@@ -103,3 +107,10 @@ class Game:
             self.board.promotion_move = False
             return piece
         return False
+
+    def update_past_positions(self):
+        position = self.board.get_position()
+        if position in self.past_positions:
+            self.past_positions[position] += 1
+        else:
+            self.past_positions[position] = 1
