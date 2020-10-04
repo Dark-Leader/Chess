@@ -1,6 +1,7 @@
 from chess.board import Board
 from chess.constants import WHITE, BLACK, LIGHT_BLUE, SQUARE_SIZE, POSSIBLE_MOVE_RADIUS, BOARD_EDGE, HEIGHT, WIDTH
 from chess.shapes.button import Button
+from chess.pieces.pawn import Pawn
 import pygame
 
 
@@ -16,6 +17,8 @@ class Game:
         self.turn = WHITE
         self.valid_moves = {}
         self.winner = None
+        self.moves_since_pawn_move_or_capture = 0
+        self.past_positions = {}
         self.buttons = []
 
     def update(self):
@@ -60,10 +63,16 @@ class Game:
             self.board.move(self.selected, row, col, self.board.board)
             capture = self.valid_moves[(row, col)]
             if capture:
+                self.moves_since_pawn_move_or_capture = 0
                 capture_row, capture_col = capture
                 if capture_row != row:  # en passant
                     self.board.remove(self.board.board, capture)
+            elif isinstance(self.selected, Pawn):
+                self.moves_since_pawn_move_or_capture = 0
+            else:
+                self.moves_since_pawn_move_or_capture += 1
             self.change_turn()
+            print(self.moves_since_pawn_move_or_capture)
             print(self.board.get_fen(self.turn))
         else:
             return False
@@ -77,7 +86,10 @@ class Game:
         else:
             self.turn = WHITE
         self.board.find_all_possible_moves(self.turn)
-        self.winner = self.board.checkmate_or_stalemate(self.turn)
+        if self.moves_since_pawn_move_or_capture == 100:
+            self.winner = "Draw - 50 move rule"
+        else:
+            self.winner = self.board.checkmate_or_stalemate(self.turn)
 
     def reset(self):
         self._initialize()

@@ -193,7 +193,7 @@ class Board:
             for col in range(COLS):
                 piece = self.get_piece(row, col)
                 if isinstance(piece, Pawn) and piece.get_color() != color and piece.can_be_captured_en_passant:
-                    piece.change_en_passant_status()
+                    piece.can_be_captured_en_passant = False
 
     def short_castle(self, row, board):
         rook = board[row][COLS - 1]
@@ -236,6 +236,7 @@ class Board:
         self.all_possible_moves = moves
 
     def get_fen(self, turn):
+        cols = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
         fen = ""
         en_passant = False
         white_king_side_castle = True
@@ -250,11 +251,11 @@ class Board:
                     if count:
                         fen += str(count)
                         count = 0
-                        if isinstance(piece, Pawn) and piece.can_be_captured_en_passant:
-                            if piece.get_color() == WHITE:
-                                en_passant = (row + 1, col)
-                            else:
-                                en_passant = (row - 1, col)
+                    if isinstance(piece, Pawn) and piece.can_be_captured_en_passant:
+                        if piece.get_color() == WHITE:
+                            en_passant = (row + 2, col)
+                        else:
+                            en_passant = (row, col)
                     fen += piece.to_fen()
                 else:
                     count += 1
@@ -263,7 +264,56 @@ class Board:
             if row != ROWS - 1:
                 fen += "/"
         if turn == WHITE:
-            fen += " b KQkq 0 1"
+            fen += " w "
         else:
-            fen += " w KQkq 0 1"
+            fen += " b "
+        # check castling rights
+        white_king = self.find_king(WHITE, self.board)
+        black_king = self.find_king(BLACK, self.board)
+        if white_king.moved_before:
+            white_king_side_castle = False
+            white_queen_side_castle = False
+        if black_king.moved_before:
+            black_king_side_castle = False
+            black_queen_side_castle = False
+        white_short_castle_rook = self.board[ROWS - 1][COLS - 1]
+        if white_short_castle_rook is None or not isinstance(white_short_castle_rook, Rook):
+            white_king_side_castle = False
+        elif isinstance(white_short_castle_rook, Rook) and white_short_castle_rook.moved_before or \
+            white_short_castle_rook.get_color() != WHITE:
+            white_king_side_castle = False
+
+        white_long_castle_rook = self.board[ROWS - 1][0]
+        if white_long_castle_rook is None or not isinstance(white_long_castle_rook, Rook):
+            white_queen_side_castle = False
+        elif isinstance(white_long_castle_rook, Rook) and white_long_castle_rook.moved_before or \
+            white_long_castle_rook.get_color() != WHITE:
+            white_queen_side_castle = False
+
+        black_short_castle_rook = self.board[0][COLS - 1]
+        if black_short_castle_rook is None or not isinstance(black_short_castle_rook, Rook):
+            black_king_side_castle = False
+        elif isinstance(black_short_castle_rook, Rook) and black_short_castle_rook.moved_before or \
+            black_short_castle_rook.get_color() != BLACK:
+            black_king_side_castle = False
+
+        black_long_castle_rook = self.board[0][0]
+        if black_long_castle_rook is None or not isinstance(black_long_castle_rook, Rook):
+            black_queen_side_castle = False
+        elif isinstance(black_long_castle_rook, Rook) and black_long_castle_rook.moved_before or \
+            black_long_castle_rook.get_color() != BLACK:
+            black_queen_side_castle = False
+
+        if white_king_side_castle:
+            fen += "K"
+        if white_queen_side_castle:
+            fen += "Q"
+        if black_king_side_castle:
+            fen += "k"
+        if black_queen_side_castle:
+            fen += "q"
+        if en_passant:
+            row, col = en_passant
+            col = cols[col]
+            fen += f" {col}{row}"
         return fen
