@@ -18,7 +18,8 @@ class Game:
         self.valid_moves = {}
         self.winner = None
         self.moves_since_pawn_move_or_capture = 0
-        self.past_positions = {self.board.get_position() : 1}
+        self.past_positions = {self.board.get_position(): 1}
+        self.move_count = 0
         self.buttons = []
 
     def update(self):
@@ -74,7 +75,8 @@ class Game:
             position = self.board.get_position()
             self.update_past_positions()
             self.change_turn(position)
-            # print(self.board.get_fen(self.turn))
+            # print(f"move: {self.move_count}")
+            print(self.board.get_fen(self.turn))
             # print(self.board.get_position())
         else:
             return False
@@ -85,6 +87,7 @@ class Game:
         self.board.stop_en_passant(self.turn)
         if self.turn == WHITE:
             self.turn = BLACK
+            self.move_count += 1
         else:
             self.turn = WHITE
         self.board.find_all_possible_moves(self.turn)

@@ -91,9 +91,9 @@ class Board:
         for row in row_numbers:
             font = pygame.font.Font(None, 24)
             text = font.render(str(row), 1, BLACK)
-            win.blit(text, (TEXT_OFFSET, BOARD_EDGE + (row - 1) * SQUARE_SIZE + SQUARE_SIZE // 2 - TEXT_OFFSET // 2))
+            win.blit(text, (TEXT_OFFSET, HEIGHT - (BOARD_EDGE + (row - 1) * SQUARE_SIZE + TEXT_OFFSET // 2)))
             win.blit(text, (SQUARE_SIZE * 8 + BOARD_EDGE + TEXT_OFFSET,
-                            BOARD_EDGE + (row - 1) * SQUARE_SIZE + SQUARE_SIZE // 2 - TEXT_OFFSET // 2))
+                            HEIGHT - (BOARD_EDGE + (row - 1) * SQUARE_SIZE + TEXT_OFFSET // 2)))
 
     def get_piece(self, row, col):
         return self.board[row][col]
@@ -252,9 +252,9 @@ class Board:
                         count = 0
                     if isinstance(piece, Pawn) and piece.can_be_captured_en_passant:
                         if piece.get_color() == WHITE:
-                            en_passant = (row + 2, col)
+                            en_passant = (row - 1, col)
                         else:
-                            en_passant = (row, col)
+                            en_passant = (row + 3, col)
                     fen += piece.to_fen()
                 else:
                     count += 1
@@ -311,10 +311,16 @@ class Board:
             fen += "k"
         if black_queen_side_castle:
             fen += "q"
+        if not (white_king_side_castle or white_queen_side_castle) and not (black_king_side_castle or black_queen_side_castle):
+            fen += "- "
+
         if en_passant:
             row, col = en_passant
             col = cols[col]
-            fen += f" {col}{row}"
+            fen += f" {col}{row} "
+        else:
+            fen += "- "
+        fen += "0 1"
         return fen
 
     def get_position(self):
