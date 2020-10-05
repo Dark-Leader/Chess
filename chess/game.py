@@ -22,10 +22,10 @@ class Game:
         self.past_positions = {self.board.get_position(): 1}
         self.move_count = 0
         self.promotion_move = False
-        self.buttons = [Button(SQUARE_SIZE * 9, SQUARE_SIZE, SQUARE_SIZE // 2, SQUARE_SIZE // 2, RED, "queen"),
-                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 2, SQUARE_SIZE // 2, SQUARE_SIZE // 2, BLUE, "bishop"),
-                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 3, SQUARE_SIZE // 2, SQUARE_SIZE // 2, GREEN, "knight"),
-                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 4, SQUARE_SIZE // 2, SQUARE_SIZE // 2, ORANGE, "rook")]
+        self.buttons = [Button(SQUARE_SIZE * 9, SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE // 2, RED, "queen"),
+                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 2, SQUARE_SIZE, SQUARE_SIZE // 2, BLUE, "bishop"),
+                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 3, SQUARE_SIZE, SQUARE_SIZE // 2, GREEN, "knight"),
+                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 4, SQUARE_SIZE, SQUARE_SIZE // 2, ORANGE, "rook")]
 
     def update(self):
         self.board.draw(self.win)

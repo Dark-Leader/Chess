@@ -1,5 +1,5 @@
 import pygame
-from chess.constants import BLACK
+from chess.constants import BLACK, TEXT_OFFSET
 
 
 class Button:
@@ -16,7 +16,7 @@ class Button:
         pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.height))
         font = pygame.font.Font(None, 24)
         text = font.render(self.name, 1, BLACK)
-        win.blit(text, ((self.x * 2 + self.width) // 2, (self.y * 2 + self.height) // 2))
+        win.blit(text, (self.x + TEXT_OFFSET * 3, (self.y * 2 + self.height) // 2))
 
     def clicked(self, position):
         x, y = position
