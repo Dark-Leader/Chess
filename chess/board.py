@@ -311,13 +311,15 @@ class Board:
             fen += "k"
         if black_queen_side_castle:
             fen += "q"
-        if not (white_king_side_castle or white_queen_side_castle) and not (black_king_side_castle or black_queen_side_castle):
-            fen += "- "
+        if not (white_king_side_castle or white_queen_side_castle) and not \
+                (black_king_side_castle or black_queen_side_castle):
+            fen += "-"
+        fen += " "
 
         if en_passant:
             row, col = en_passant
             col = cols[col]
-            fen += f" {col}{row} "
+            fen += f"{col}{row} "
         else:
             fen += "- "
         fen += "0 1"

@@ -21,3 +21,6 @@ class Button:
     def clicked(self, position):
         x, y = position
         return self.x <= x <= self.x + self.width and self.y <= y <= self.y + self.height
+
+    def get_name(self):
+        return self.name

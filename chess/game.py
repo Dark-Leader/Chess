@@ -1,5 +1,6 @@
 from chess.board import Board
-from chess.constants import WHITE, BLACK, LIGHT_BLUE, SQUARE_SIZE, POSSIBLE_MOVE_RADIUS, BOARD_EDGE, HEIGHT, WIDTH
+from chess.constants import (WHITE, BLACK, LIGHT_BLUE, SQUARE_SIZE, POSSIBLE_MOVE_RADIUS, BOARD_EDGE, HEIGHT, WIDTH,
+                             RED, BLUE, GREEN, ORANGE)
 from chess.shapes.button import Button
 from chess.pieces.pawn import Pawn
 import pygame
@@ -20,11 +21,18 @@ class Game:
         self.moves_since_pawn_move_or_capture = 0
         self.past_positions = {self.board.get_position(): 1}
         self.move_count = 0
-        self.buttons = []
+        self.promotion_move = False
+        self.buttons = [Button(SQUARE_SIZE * 9, SQUARE_SIZE, SQUARE_SIZE // 2, SQUARE_SIZE // 2, RED, "queen"),
+                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 2, SQUARE_SIZE // 2, SQUARE_SIZE // 2, BLUE, "bishop"),
+                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 3, SQUARE_SIZE // 2, SQUARE_SIZE // 2, GREEN, "knight"),
+                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 4, SQUARE_SIZE // 2, SQUARE_SIZE // 2, ORANGE, "rook")]
 
     def update(self):
         self.board.draw(self.win)
         self.draw_valid_moves()
+        if self.promotion_move:
+            for button in self.buttons:
+                button.draw(self.win)
 
     def draw_valid_moves(self):
         for move in self.valid_moves:
@@ -33,9 +41,9 @@ class Game:
                                row * SQUARE_SIZE + SQUARE_SIZE // 2 + BOARD_EDGE), POSSIBLE_MOVE_RADIUS)
 
     def select(self, position):
-        result = self.get_position(position)
-        if result:
-            row, col = result
+        pos = self.get_position(position)
+        if pos and not self.promotion_move:
+            row, col = pos
             if self.selected:
                 result = self._move(row, col)
                 if not result:
@@ -47,6 +55,26 @@ class Game:
                 self.selected = piece
                 self.valid_moves = self.board.find_legal_moves(piece)
                 return True
+        elif self.promotion_move:
+            row, col = self.promotion_move
+            for button in self.buttons:
+                if button.clicked(position):
+                    piece_type = button.get_name()
+                    piece = self.board.get_piece(row, col)
+                    if piece_type == "queen":
+                        self.board.board[row][col] = piece.promote_to_queen()
+                    elif piece_type == "bishop":
+                        self.board.board[row][col] = piece.promote_to_bishop()
+                    elif piece_type == "knight":
+                        self.board.board[row][col] = piece.promote_to_knight()
+                    elif piece_type == "rook":
+                        self.board.board[row][col] = piece.promote_to_rook()
+            self.promotion_move = False
+            self.board.promotion_move = False
+            self.update_past_positions()
+            board_pos = self.board.get_position()
+            self.change_turn(board_pos)
+            self.moves_since_pawn_move_or_capture = 0
         return False
 
     @staticmethod
@@ -73,8 +101,10 @@ class Game:
             else:
                 self.moves_since_pawn_move_or_capture += 1
             position = self.board.get_position()
-            self.update_past_positions()
-            self.change_turn(position)
+            self.promotion_move = self.board.promotion_move
+            if not self.promotion_move:
+                self.update_past_positions()
+                self.change_turn(position)
             # print(f"move: {self.move_count}")
             print(self.board.get_fen(self.turn))
             # print(self.board.get_position())
