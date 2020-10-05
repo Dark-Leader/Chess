@@ -75,12 +75,13 @@ class Game:
             board_pos = self.board.get_position()
             self.change_turn(board_pos)
             self.moves_since_pawn_move_or_capture = 0
+            return True
         return False
 
     @staticmethod
     def get_position(position):
         x, y = position
-        if BOARD_EDGE <= x <= WIDTH + BOARD_EDGE and BOARD_EDGE <= y <= HEIGHT + BOARD_EDGE:
+        if BOARD_EDGE < x < WIDTH + BOARD_EDGE and BOARD_EDGE < y < HEIGHT + BOARD_EDGE:
             row = (y - BOARD_EDGE) // SQUARE_SIZE
             col = (x - BOARD_EDGE) // SQUARE_SIZE
             return row, col
@@ -106,7 +107,7 @@ class Game:
                 self.update_past_positions()
                 self.change_turn(position)
             # print(f"move: {self.move_count}")
-            print(self.board.get_fen(self.turn))
+            # print(self.board.get_fen(self.turn))
             # print(self.board.get_position())
         else:
             return False
