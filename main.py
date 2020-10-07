@@ -7,11 +7,11 @@ window = pygame.display.set_mode((WIDTH + BOARD_EDGE * 2, HEIGHT + BOARD_EDGE * 
 pygame.display.set_caption("Chess")
 clock = pygame.time.Clock()
 game = Game(window)
-engine = Engine()
-engine.get_response()
-engine.put_command("uci")
-engine.get_response()
-engine.put_command('quit')
+# engine = Engine()
+# engine.get_response()
+# engine.put_command("uci")
+# engine.get_response()
+# engine.put_command('quit')
 
 running = True
 while running:
