@@ -1,7 +1,7 @@
 import pygame
 from chess.constants import WIDTH, HEIGHT, FPS, BOARD_EDGE
 from chess.game import Game
-from chess.engine import Engine
+# from chess.engine import Engine
 pygame.init()
 window = pygame.display.set_mode((WIDTH + BOARD_EDGE * 2, HEIGHT + BOARD_EDGE * 2))
 pygame.display.set_caption("Chess")
