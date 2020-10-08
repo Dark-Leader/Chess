@@ -1,8 +1,9 @@
 from chess.board import Board
 from chess.constants import (WHITE, BLACK, LIGHT_BLUE, SQUARE_SIZE, POSSIBLE_MOVE_RADIUS, BOARD_EDGE, HEIGHT, WIDTH,
-                             RED, BLUE, GREEN, ORANGE)
+                             RED, BLUE, GREEN, ORANGE, ENGINE_TIME_PER_MOVE, ROWS)
 from chess.shapes.button import Button
 from chess.pieces.pawn import Pawn
+from chess.engine import Engine
 import pygame
 
 
@@ -11,6 +12,7 @@ class Game:
     def __init__(self, win):
         self.win = win
         self._initialize()
+        self.engine = Engine()
 
     def _initialize(self):
         self.board = Board()
@@ -39,7 +41,39 @@ class Game:
             row, col = move
             pygame.draw.circle(self.win, LIGHT_BLUE, (col * SQUARE_SIZE + SQUARE_SIZE // 2 + BOARD_EDGE,
                                row * SQUARE_SIZE + SQUARE_SIZE // 2 + BOARD_EDGE), POSSIBLE_MOVE_RADIUS)
+    
+    def make_move(self, pos=None):
+        if self.turn == WHITE:
+            if pos:
+                self.select(pos)
+        else:
+            self.make_engine_move()
 
+    def make_engine_move(self):
+        self.engine.set_position(self.get_current_fen())
+        move = self.engine.get_move(ENGINE_TIME_PER_MOVE)
+        promotion = False
+        if len(move) == 5:
+            start_col, start_row, end_col, end_row, promotion = move
+            start_col, end_col = ord(start_col) - 97, ord(end_col) - 97
+            start_row, end_row = ROWS - int(start_row), ROWS - int(end_row)
+        else:
+            start_col, start_row, end_col, end_row = move
+            start_col, end_col = ord(start_col) - 97, ord(end_col) - 97
+            start_row, end_row = ROWS - int(start_row), ROWS - int(end_row)
+        piece = self.board.get_piece(start_row, start_col)
+        self.selected = piece
+        self.valid_moves = piece.find_legal_moves(self.board.board)
+        self._move(end_row, end_col)
+        if promotion == "q":
+            self.board.board[end_row][end_col] = piece.promote_to_queen()
+        elif promotion == 'n':
+            self.board.board[end_row][end_col] = piece.promote_to_knight()
+        elif promotion == 'r':
+            self.board.board[end_row][end_col] = piece.promote_to_rook()
+        elif promotion == 'b':
+            self.board.board[end_row][end_col] = piece.promote_to_bishop()
+    
     def select(self, position):
         pos = self.get_position(position)
         if pos and not self.promotion_move:
@@ -55,7 +89,7 @@ class Game:
                 self.selected = piece
                 self.valid_moves = self.board.find_legal_moves(piece)
                 return True
-        elif self.promotion_move:
+        if self.promotion_move:
             row, col = self.promotion_move
             for button in self.buttons:
                 if button.clicked(position):
@@ -69,13 +103,13 @@ class Game:
                         self.board.board[row][col] = piece.promote_to_knight()
                     elif piece_type == "rook":
                         self.board.board[row][col] = piece.promote_to_rook()
-            self.promotion_move = False
-            self.board.promotion_move = False
-            self.update_past_positions()
-            board_pos = self.board.get_position()
-            self.change_turn(board_pos)
-            self.moves_since_pawn_move_or_capture = 0
-            return True
+                    self.promotion_move = False
+                    self.board.promotion_move = False
+                    self.update_past_positions()
+                    board_pos = self.board.get_position()
+                    self.change_turn(board_pos)
+                    self.moves_since_pawn_move_or_capture = 0
+                    return True
         return False
 
     @staticmethod
@@ -106,9 +140,6 @@ class Game:
             if not self.promotion_move:
                 self.update_past_positions()
                 self.change_turn(position)
-            # print(f"move: {self.move_count}")
-            # print(self.board.get_fen(self.turn))
-            # print(self.board.get_position())
         else:
             return False
         return True
@@ -116,6 +147,7 @@ class Game:
     def change_turn(self, position):
         self.valid_moves = {}
         self.board.stop_en_passant(self.turn)
+        self.selected = None
         if self.turn == WHITE:
             self.turn = BLACK
             self.move_count += 1
@@ -148,3 +180,6 @@ class Game:
             self.past_positions[position] += 1
         else:
             self.past_positions[position] = 1
+
+    def get_current_fen(self):
+        return self.board.get_fen(self.turn, self.moves_since_pawn_move_or_capture, self.move_count)

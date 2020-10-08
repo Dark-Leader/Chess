@@ -234,7 +234,7 @@ class Board:
         moves.update(king_moves)
         self.all_possible_moves = moves
 
-    def get_fen(self, turn):
+    def get_fen(self, turn, half_moves, full_moves):
         cols = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
         fen = ""
         en_passant = False
@@ -322,7 +322,7 @@ class Board:
             fen += f"{col}{row} "
         else:
             fen += "- "
-        fen += "0 1"
+        fen += f"{half_moves} {full_moves}"
         return fen
 
     def get_position(self):
