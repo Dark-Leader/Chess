@@ -109,7 +109,7 @@ class Board:
         elif isinstance(piece, King) and col == start_col - 2 and not \
                 self.check(start_row, start_col, piece.get_color(), array):  # long_castle
             self.long_castle(start_row, array)
-        elif isinstance(piece, Pawn) and (row == ROWS - 1 or row == 0):
+        elif isinstance(piece, Pawn) and (row == ROWS - 1 or row == 0) and array == self.board:  # pawn promotion move
             self.promotion_move = (row, col)
 
     def find_legal_moves(self, piece):
@@ -123,7 +123,7 @@ class Board:
         for row in range(ROWS):
             for col in range(COLS):
                 piece = board[row][col]
-                if isinstance(piece, King) and piece.get_color() == color and piece is not None:
+                if isinstance(piece, King) and piece.get_color() == color:
                     return piece
 
     @staticmethod

@@ -89,8 +89,9 @@ class Game:
                 self.selected = piece
                 self.valid_moves = self.board.find_legal_moves(piece)
                 return True
-        if self.promotion_move:
+        elif self.promotion_move:
             row, col = self.promotion_move
+            piece = self.board.get_piece(row, col)
             for button in self.buttons:
                 if button.clicked(position):
                     piece_type = button.get_name()
