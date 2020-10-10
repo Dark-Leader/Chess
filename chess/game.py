@@ -4,18 +4,25 @@ from chess.constants import (WHITE, BLACK, LIGHT_BLUE, SQUARE_SIZE, POSSIBLE_MOV
 from chess.shapes.button import Button
 from chess.pieces.pawn import Pawn
 from chess.engine import Engine
+import time
 import pygame
 
 
 class Game:
 
-    def __init__(self, win):
+    def __init__(self, win, skill_level):
         self.win = win
+        self.board = Board()
         self._initialize()
-        self.engine = Engine()
+        self.engine = Engine(skill_level)
+        self.buttons = [Button(SQUARE_SIZE * 9, SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE // 2, RED, "queen"),
+                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 2, SQUARE_SIZE, SQUARE_SIZE // 2, BLUE, "bishop"),
+                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 3, SQUARE_SIZE, SQUARE_SIZE // 2, GREEN, "knight"),
+                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 4, SQUARE_SIZE, SQUARE_SIZE // 2, ORANGE, "rook")]
+
 
     def _initialize(self):
-        self.board = Board()
+
         self.selected = None
         self.turn = WHITE
         self.valid_moves = {}
@@ -24,10 +31,7 @@ class Game:
         self.past_positions = {self.board.get_position(): 1}
         self.move_count = 0
         self.promotion_move = False
-        self.buttons = [Button(SQUARE_SIZE * 9, SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE // 2, RED, "queen"),
-                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 2, SQUARE_SIZE, SQUARE_SIZE // 2, BLUE, "bishop"),
-                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 3, SQUARE_SIZE, SQUARE_SIZE // 2, GREEN, "knight"),
-                        Button(SQUARE_SIZE * 9, SQUARE_SIZE * 4, SQUARE_SIZE, SQUARE_SIZE // 2, ORANGE, "rook")]
+
 
     def update(self):
         self.board.draw(self.win)
@@ -41,13 +45,6 @@ class Game:
             row, col = move
             pygame.draw.circle(self.win, LIGHT_BLUE, (col * SQUARE_SIZE + SQUARE_SIZE // 2 + BOARD_EDGE,
                                row * SQUARE_SIZE + SQUARE_SIZE // 2 + BOARD_EDGE), POSSIBLE_MOVE_RADIUS)
-    
-    def make_move(self, pos=None):
-        if self.turn == WHITE:
-            if pos:
-                self.select(pos)
-        else:
-            self.make_engine_move()
 
     def make_engine_move(self):
         self.engine.set_position(self.get_current_fen())
@@ -55,24 +52,33 @@ class Game:
         promotion = False
         if len(move) == 5:
             start_col, start_row, end_col, end_row, promotion = move
-            start_col, end_col = ord(start_col) - 97, ord(end_col) - 97
+            start_col, end_col = ord(start_col) - ord('a'), ord(end_col) - ord('a')
             start_row, end_row = ROWS - int(start_row), ROWS - int(end_row)
         else:
             start_col, start_row, end_col, end_row = move
-            start_col, end_col = ord(start_col) - 97, ord(end_col) - 97
+            start_col, end_col = ord(start_col) - ord('a'), ord(end_col) - ord('a')
             start_row, end_row = ROWS - int(start_row), ROWS - int(end_row)
         piece = self.board.get_piece(start_row, start_col)
         self.selected = piece
         self.valid_moves = piece.find_legal_moves(self.board.board)
-        self._move(end_row, end_col)
-        if promotion == "q":
-            self.board.board[end_row][end_col] = piece.promote_to_queen()
-        elif promotion == 'n':
-            self.board.board[end_row][end_col] = piece.promote_to_knight()
-        elif promotion == 'r':
-            self.board.board[end_row][end_col] = piece.promote_to_rook()
-        elif promotion == 'b':
-            self.board.board[end_row][end_col] = piece.promote_to_bishop()
+        if promotion:
+            self.board.move(self.selected, end_row, end_col, self.board.board)
+            if promotion == "q":
+                self.board.board[end_row][end_col] = piece.promote_to_queen()
+            elif promotion == 'n':
+                self.board.board[end_row][end_col] = piece.promote_to_knight()
+            elif promotion == 'r':
+                self.board.board[end_row][end_col] = piece.promote_to_rook()
+            elif promotion == 'b':
+                self.board.board[end_row][end_col] = piece.promote_to_bishop()
+            self.board.remove(self.board.board, (start_row, start_col))
+            self.moves_since_pawn_move_or_capture = 0
+            current_position = self.board.get_position()
+            self.update_past_positions()
+            self.change_turn(current_position)
+        else:
+            self._move(end_row, end_col)
+        time.sleep(1)
     
     def select(self, position):
         pos = self.get_position(position)
@@ -163,6 +169,7 @@ class Game:
             self.winner = self.board.checkmate_or_stalemate(self.turn)
 
     def reset(self):
+        self.board.reset()
         self._initialize()
 
     def get_winner(self):

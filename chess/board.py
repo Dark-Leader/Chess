@@ -109,7 +109,7 @@ class Board:
         elif isinstance(piece, King) and col == start_col - 2 and not \
                 self.check(start_row, start_col, piece.get_color(), array):  # long_castle
             self.long_castle(start_row, array)
-        elif isinstance(piece, Pawn) and (row == ROWS - 1 or row == 0) and array == self.board:  # pawn promotion move
+        elif isinstance(piece, Pawn) and (row == 0) and array == self.board:  # pawn promotion move
             self.promotion_move = (row, col)
 
     def find_legal_moves(self, piece):
@@ -154,8 +154,12 @@ class Board:
             if isinstance(piece, King) and end_col == piece.get_col() + 2:  # short castle
                 if self.check(piece.get_row(), piece.get_col() + 1, color, copy_board):
                     bad_moves.append(move)
+                elif self.check(piece.get_row(), piece.get_col(), piece.get_color(), copy_board):
+                    bad_moves.append(move)
             if isinstance(piece, King) and end_col == piece.get_col() - 2:  # long castle
                 if self.check(piece.get_row(), piece.get_col() - 1, color, copy_board):
+                    bad_moves.append(move)
+                elif self.check(piece.get_row(), piece.get_col(), piece.get_color(), copy_board):
                     bad_moves.append(move)
         for move in bad_moves:
             if move in moves:
@@ -343,3 +347,6 @@ class Board:
             if row != ROWS - 1:
                 fen += "/"
         return fen
+
+    def reset(self):
+        self._initialize_board()
