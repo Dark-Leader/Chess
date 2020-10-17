@@ -350,3 +350,26 @@ class Board:
 
     def reset(self):
         self._initialize_board()
+        self.valid_moves = {}
+        self.all_possible_moves = {}
+        self.winner = None
+        self.promotion_move = False
+
+    def print_board_to_console(self):
+        board_width = 21
+        rows = [i for i in range(8, 0, - 1)]
+        cols = " ".join([chr(i) for i in range(65, 73)])
+        print("-" * board_width)
+        print(f"   {cols}")
+        for row in range(ROWS):
+            print(f"{rows[row]} |", end="")
+            for col in range(COLS):
+                piece = self.get_piece(row, col)
+                if piece:
+                    print(f"{piece.to_fen()}|", end="")
+                else:
+                    print(" |", end="")
+            print(f" {rows[row]}")
+        print(f"   {cols}")
+        print("-" * board_width)
+

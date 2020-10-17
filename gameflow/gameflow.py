@@ -37,6 +37,7 @@ class GameFlow:
             result = self.game.get_winner()
             if result:
                 print(result)
+                self.game.board.print_board_to_console()
                 self.game.reset()
                 # self.game_over = True
             pygame.display.flip()
